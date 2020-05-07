@@ -2,7 +2,7 @@ package com.github.example.kafka
 
 import twitter4j.{FilterQuery, TwitterStreamFactory}
 import com.github.example.utils.utils.{config,simpleStatusListener}
-object twitterStreamProducer {
+object twitterStreamProducer  extends App {
   var finishingLoop = true
 
   //Create a twitter connect
