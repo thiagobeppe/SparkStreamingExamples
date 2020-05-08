@@ -15,7 +15,7 @@ object saveTweetsApp extends App{
   setupLogging()
 
   val lines = KafkaUtils.createDirectStream[String,String](ssc, PreferConsistent, Subscribe[String,String](topic, kafkaParams))
-  lines
+  val toSave = lines
     .map(record=> record.value().toString)
     .map(value => jsonParser.readValue(value, classOf[JsonNode]))
     .map(value => {
@@ -26,7 +26,15 @@ object saveTweetsApp extends App{
 
   var totalTweets:Long = 0
 
-
+  toSave.foreachRDD((rdd, time) => {
+    if(rdd.count() > 0){
+      val repartionedRDD = rdd.repartition(1).cache()
+      repartionedRDD.saveAsTextFile(s"../results/Tweets_${time.milliseconds.toString}")
+      totalTweets += repartionedRDD.count()
+      println(s"Tweet count: $totalTweets")
+      if (totalTweets > 100) System.exit(0)
+    }
+  })
   ssc.start()
   ssc.awaitTermination()
 }
