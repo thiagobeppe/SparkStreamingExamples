@@ -1,24 +1,20 @@
 package com.github.example.kafka
 
-import java.util.Properties
 import java.util.UUID.randomUUID
 
+import com.github.example.utils.utils.{props, setupLogging, topicKafka}
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
-import org.slf4j.LoggerFactory
 
 object KafkaProducer {
-  val props = new Properties()
-  props.put("bootstrap.servers", "localhost:9092")
-  props.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer")
-  props.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer")
-  props.put("ack", "1")
-  props.put("max.in.flight.requests.per.connection", "5")
+  //Properties of the producer
+
 
   val producer = new KafkaProducer[String,String](props)
-  val topic = "TWEET_TOPIC_STREAM_SPARK"
+  setupLogging()
 
+  //method to send msg to the topic
   def run (status: String): Unit ={
-    val record = new ProducerRecord[String,String](topic,
+    val record = new ProducerRecord[String,String](topicKafka,
       randomUUID().toString,
       status)
     val metadata = producer.send(record, new Callback {
